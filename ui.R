@@ -3,30 +3,43 @@ library(shinydashboard)
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
+    menuItem("Example",tabName="example"),
+    menuItem("test",tabName="test"),br(),
     textInput("treat1","Treatment 1:",value="Treatment 1"),
     textInput("treat2","Treatment 2:", value="Treatment 2"),
     textInput("var1","Variable 1:", value= "A"),
     textInput("var2","Variable 2:",value= "B")
   
-  )
+  ) 
 )
 
 body <- dashboardBody(
-  fluidRow(
-    box(title = "Data Entry", width=8,
-        column(width=4,textOutput("tr1"), rHandsontableOutput("table1")),
-        column(width=4,textOutput("tr2"),rHandsontableOutput("table2"))
+  tabItems(
+    tabItem(tabName="example",
+      fluidRow(
+        box(title = "Data Entry", width=6,solidHeader = TRUE,status="primary",
+            column(width=5,textOutput("tr1"), rHandsontableOutput("table1"), downloadButton("downloadData","Download Data")),
+            column(width=5,textOutput("tr2"),rHandsontableOutput("table2"))
+        ),
+        tabBox(id = "plots",width = 4,
+            tabPanel("Plotting means",plotOutput("plot1"),
+              radioButtons("errortype", "Error bars:", 
+                           choices=c("95% Confidence interval"="ci","Standard error (SE)"="se","Standard deviation (S)"="sd")),
+              downloadButton("downloadplotr","Get code for plot")),
+            tabPanel("Histogram",plotOutput("histo"),
+              checkboxInput("showmean","Show means", value=FALSE))
+        )
+      ),
+      fluidRow(
+        box(title="Data Summary", width = 6,status="primary",
+            rHandsontableOutput("summary_table")
+        ),
+        infoBoxOutput("significance",width=4)
+      )
     ),
-    box(title = "Plotting means", width = 4,
-        plotOutput("plot1"),
-        radioButtons("errortype", "Error bars:", choices=c("95% Confidence interval"="ci","Standard error (SE)"="se","Standard deviation (S)"="sd"))#add CI
+    tabItem(tabName="test",
+            h2("this is a test")
     )
-  ),
-  fluidRow(
-    box(title="Summary Statistics", width = 8,
-        dataTableOutput("summary_table")
-    ),
-    infoBoxOutput("significance",width=4)
   )
 )
 
