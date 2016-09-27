@@ -22,7 +22,7 @@ body <- dashboardBody(
             column(width=5,textOutput("tr2"),rHandsontableOutput("table2"),actionButton("getdata","Analyze Data"))
         ),
         tabBox(id = "plots",width = 4,
-            tabPanel("Plotting means",plotOutput("plottest"),
+            tabPanel("Plotting means",plotOutput("plot1"),
               radioButtons("errortype", "Error bars:", 
                            choices=c("95% Confidence interval"="ci","Standard error (SE)"="se","Standard deviation (S)"="sd")),
               downloadButton("downloadplotr","Get code for plot")),

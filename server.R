@@ -20,12 +20,6 @@ shinyServer(function(input,output){
   output$var2<-renderText({input$var2})
   
   ##make blank dfs
-  treat1.df = data.frame(variable1 =as.numeric(rep(NA,3)), 
-                   variable2 = as.numeric(rep(NA,3)),
-                   prop = as.numeric(rep(NA,3))
-                  )
-  
-  
   testdf1 = data.frame(variable1 = as.numeric(runif(20,0,20)),
                       variable2 = as.numeric(runif(20,0,30)))
   testdf1$propvar1<-testdf1$variable1/(testdf1$variable1+testdf1$variable2)
@@ -42,6 +36,14 @@ shinyServer(function(input,output){
                               variable2 = as.numeric(runif(20,0,30)))
   values$testdf2 = data.frame(variable1 = as.numeric(runif(20,0,20)),
                               variable2 = as.numeric(runif(20,0,30)))
+  values$df_data = data.frame(variable1= as.numeric(rep(0,40)),
+                                  variable2=as.numeric(rep(0,40)),
+                                  treat = as.factor(rep("treat1",40)),
+                                  prop = as.numeric(rep(0,40)))
+  values$summ_data = data.frame(treat = c("treat1","treat2"),
+                                mean_prop = c(0,0),
+                                n_df = c(0,0),
+                                errorr = c(0,0))
   
   ##generate talbes
   output$table1 = renderRHandsontable({
@@ -54,39 +56,35 @@ shinyServer(function(input,output){
   })
   
   observeEvent(input$getdata, {
-    values$df_data1<-hot_to_r(input$table1)
-  })
-
-  output$plottest <- renderPlot({
+    df_data1<-hot_to_r(input$table1)
+    df_data2<-hot_to_r(input$table2)
     
-    bar.plot<-ggplot(values$df_data,aes(x=values$df_data$variable2,y=values$df_data$variable1))+#plot
-      geom_point(size=3)+
-      theme_mooney()+
-      labs(x="Treatment",y=" ")+
-      scale_fill_manual(values=c("#006666","#FF9900"))+
-      theme(legend.position="none")
-    bar.plot
-  })
-  ##plot means
-  output$plot1 <- renderPlot({
-    testdf1$treat<-rep(input$treat1,length(testdf1$propvar1))#combine datatables for plot
-    testdf2$treat<-rep(input$treat2,length(testdf2$propvar1))
-    alldata<-rbind(testdf1,testdf2)
+    df_data1$treat<-rep(input$treat1,length(values$df_data1$variable1))
+    df_data2$treat<-rep(input$treat2,length(values$df_data2$variable1))
+    
+    df_data_all<-rbind(df_data1,df_data2)
+    df_data_all$prop<-df_data_all$variable1/(df_data_all$variable1/df_data_all$variable2)
     
     errorb<-switch(input$errortype,##reactive error bars
                    se=se,
                    sd=sd,
                    ci=ci95)
     
-    all.summ<-both.treat%>%
+    summdata<-df_data_all%>%
       group_by(treat)%>%
-      summarize(mean_prop = mean(propvar1), n_df = length(propvar1), errorr=errorb(propvar1))
+      summarize(mean_prop = mean(prop), n_df = length(prop), errorr=errorb(prop))
     
-    
+    values$df_data<-df_data_all
+    values$summ_data<-summdata
+    str(df_data1)
+  })
+
+ #plot means
+  output$plot1 <- renderPlot({
     yvar.lab<-paste("Proportion",input$var1)#reactive y axis label based on variable inputs
     ##eventually want the plotted variable to be a drop-down so that it could be proportion var1 or var2
     
-    bar.plot<-ggplot(all.summ,aes(x=treat,y=mean_prop,fill=treat))+#plot
+    bar.plot<-ggplot(values$summ_data,aes(x=treat,y=mean_prop,fill=treat))+#plot
       geom_bar(stat="identity")+
       theme_mooney()+
       geom_errorbar(aes(ymax=mean_prop+errorr,ymin=mean_prop-errorr),width=.2)+
