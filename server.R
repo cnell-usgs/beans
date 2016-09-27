@@ -34,7 +34,10 @@ shinyServer(function(input,output){
                        variable2 = as.numeric(runif(20,0,30)))
   testdf2$propvar1<-testdf2$variable1/(testdf2$variable1+testdf2$variable2)
   
-  values <- reactiveValues()
+  values <- reactiveValues(df_data1 = data.frame(variable1 = as.numeric(rep(NA,20)),
+                                                variable2 = as.numeric(rep(NA,20))),
+                           df_data2 =data.frame(variable1 = as.numeric(rep(NA,20)),
+                                                variable2 = as.numeric(rep(NA,20))))
   values$testdf1 = data.frame(variable1 = as.numeric(runif(20,0,20)),
                               variable2 = as.numeric(runif(20,0,30)))
   values$testdf2 = data.frame(variable1 = as.numeric(runif(20,0,20)),
@@ -43,27 +46,39 @@ shinyServer(function(input,output){
   ##generate talbes
   output$table1 = renderRHandsontable({
     pvar1<-paste0("Prop(",input$var1,")")
-    rhandsontable(values$testdf1,colHeaders =c(input$var1,input$var2,pvar1))
+    rhandsontable(values$df_data1,colHeaders =c(input$var1,input$var2,pvar1))
   })
   output$table2 = renderRHandsontable({
     pvar1<-paste0("Prop(",input$var1,")")
-    rhandsontable(values$testdf2,colHeaders =c(input$var1,input$var2,pvar1))
+    rhandsontable(values$df_data2,colHeaders =c(input$var1,input$var2,pvar1))
   })
   
-  print(testdf1[1,1])
-  
+  observeEvent(input$getdata, {
+    values$df_data1<-hot_to_r(input$table1)
+  })
+
+  output$plottest <- renderPlot({
+    
+    bar.plot<-ggplot(values$df_data,aes(x=values$df_data$variable2,y=values$df_data$variable1))+#plot
+      geom_point(size=3)+
+      theme_mooney()+
+      labs(x="Treatment",y=" ")+
+      scale_fill_manual(values=c("#006666","#FF9900"))+
+      theme(legend.position="none")
+    bar.plot
+  })
   ##plot means
   output$plot1 <- renderPlot({
-    testdf1$treat<-rep(input$treat1,length(values$testdf1$propvar1))#combine datatables for plot
+    testdf1$treat<-rep(input$treat1,length(testdf1$propvar1))#combine datatables for plot
     testdf2$treat<-rep(input$treat2,length(testdf2$propvar1))
-    alldata<-rbind(values$testdf1,values$testdf2)
+    alldata<-rbind(testdf1,testdf2)
     
     errorb<-switch(input$errortype,##reactive error bars
                    se=se,
                    sd=sd,
                    ci=ci95)
     
-    all.summ<-alldata%>%
+    all.summ<-both.treat%>%
       group_by(treat)%>%
       summarize(mean_prop = mean(propvar1), n_df = length(propvar1), errorr=errorb(propvar1))
     

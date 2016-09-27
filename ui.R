@@ -19,10 +19,10 @@ body <- dashboardBody(
       fluidRow(
         box(title = "Data Entry", width=6,solidHeader = TRUE,status="primary",
             column(width=5,textOutput("tr1"), rHandsontableOutput("table1"), downloadButton("downloadData","Download Data")),
-            column(width=5,textOutput("tr2"),rHandsontableOutput("table2"))
+            column(width=5,textOutput("tr2"),rHandsontableOutput("table2"),actionButton("getdata","Analyze Data"))
         ),
         tabBox(id = "plots",width = 4,
-            tabPanel("Plotting means",plotOutput("plot1"),
+            tabPanel("Plotting means",plotOutput("plottest"),
               radioButtons("errortype", "Error bars:", 
                            choices=c("95% Confidence interval"="ci","Standard error (SE)"="se","Standard deviation (S)"="sd")),
               downloadButton("downloadplotr","Get code for plot")),
