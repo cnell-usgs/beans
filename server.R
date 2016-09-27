@@ -25,6 +25,7 @@ shinyServer(function(input,output){
                    prop = as.numeric(rep(NA,3))
                   )
   
+  
   testdf1 = data.frame(variable1 = as.numeric(runif(20,0,20)),
                       variable2 = as.numeric(runif(20,0,30)))
   testdf1$propvar1<-testdf1$variable1/(testdf1$variable1+testdf1$variable2)
@@ -33,24 +34,29 @@ shinyServer(function(input,output){
                        variable2 = as.numeric(runif(20,0,30)))
   testdf2$propvar1<-testdf2$variable1/(testdf2$variable1+testdf2$variable2)
   
-  
-
+  values <- reactiveValues()
+  values$testdf1 = data.frame(variable1 = as.numeric(runif(20,0,20)),
+                              variable2 = as.numeric(runif(20,0,30)))
+  values$testdf2 = data.frame(variable1 = as.numeric(runif(20,0,20)),
+                              variable2 = as.numeric(runif(20,0,30)))
   
   ##generate talbes
   output$table1 = renderRHandsontable({
     pvar1<-paste0("Prop(",input$var1,")")
-    rhandsontable(testdf1,colHeaders =c(input$var1,input$var2,pvar1))
+    rhandsontable(values$testdf1,colHeaders =c(input$var1,input$var2,pvar1))
   })
   output$table2 = renderRHandsontable({
     pvar1<-paste0("Prop(",input$var1,")")
-    rhandsontable(testdf2,colHeaders =c(input$var1,input$var2,pvar1))
+    rhandsontable(values$testdf2,colHeaders =c(input$var1,input$var2,pvar1))
   })
+  
+  print(testdf1[1,1])
   
   ##plot means
   output$plot1 <- renderPlot({
-    testdf1$treat<-rep(input$treat1,length(testdf1$propvar1))#combine datatables for plot
+    testdf1$treat<-rep(input$treat1,length(values$testdf1$propvar1))#combine datatables for plot
     testdf2$treat<-rep(input$treat2,length(testdf2$propvar1))
-    alldata<-rbind(testdf1,testdf2)
+    alldata<-rbind(values$testdf1,values$testdf2)
     
     errorb<-switch(input$errortype,##reactive error bars
                    se=se,

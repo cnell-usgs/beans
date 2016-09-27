@@ -3,7 +3,7 @@ library(shinydashboard)
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
-    menuItem("Example",tabName="example"),
+    menuItem("Example",tabName="example",icon=icon("stats",lib="glyphicon")),
     menuItem("test",tabName="test"),br(),
     textInput("treat1","Treatment 1:",value="Treatment 1"),
     textInput("treat2","Treatment 2:", value="Treatment 2"),
