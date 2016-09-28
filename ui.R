@@ -18,14 +18,16 @@ body <- dashboardBody(
     tabItem(tabName="example",
       fluidRow(
         box(title = "Data Entry", width=6,solidHeader = TRUE,status="primary",
+            p("Enter data here, then press 'Run data' to generate summary statistics and plot. 
+              To replicate these analyses in R, use the 'Download Data' and 'Get Code' buttons to see how it was done."),
             column(width=5,textOutput("tr1"), rHandsontableOutput("table1"), downloadButton("downloadData","Download Data")),
-            column(width=5,textOutput("tr2"),rHandsontableOutput("table2"),actionButton("getdata","Analyze Data"))
+            column(width=5,textOutput("tr2"),rHandsontableOutput("table2"),actionButton("getdata","Run Data"))
         ),
         tabBox(id = "plots",width = 4,
             tabPanel("Plotting means",plotOutput("plot1"),
               radioButtons("errortype", "Error bars:", 
                            choices=c("95% Confidence interval"="ci","Standard error (SE)"="se","Standard deviation (S)"="sd")),
-              downloadButton("downloadplotr","Get code for plot")),
+              downloadButton("downloadplotr","Get code")),
             tabPanel("Histogram",plotOutput("histo"),
               checkboxInput("showmean","Show means", value=FALSE))
         )
