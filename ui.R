@@ -21,13 +21,15 @@ body <- dashboardBody(
         box(title = "Data Entry", width=6,solidHeader = TRUE,status="primary",
             p("Enter data here, then press 'Run data' to generate summary statistics and plot. 
               To replicate these analyses in R, use the 'Download Data' and 'Get Code' buttons to see how it was done."),
-            column(width=5,textOutput("tr1"), rHandsontableOutput("table1"), downloadButton("downloadData","Download Data")),
-            column(width=5,textOutput("tr2"),rHandsontableOutput("table2"),actionButton("getdata","Run Data"))
+            column(width=5,textOutput("tr1"), rHandsontableOutput("table1")),
+            column(width=5,textOutput("tr2"),rHandsontableOutput("table2"))
         ),
         tabBox(id = "plots",width = 4,
             tabPanel("Plotting means",plotOutput("plot1"),
               radioButtons("errortype", "Error bars:", 
                            choices=c("95% Confidence interval"="ci","Standard error (SE)"="se","Standard deviation (S)"="sd")),
+              actionButton("getdata","Run Data"),
+              downloadButton("downloadData","Download Data"),
               downloadButton("downloadplotr","Get code")),
             tabPanel("Histogram",plotOutput("histo"),
               checkboxInput("showmean","Show means", value=FALSE))
@@ -35,9 +37,8 @@ body <- dashboardBody(
       ),
       fluidRow(
         box(title="Data Summary", width = 6,status="primary",
-            rHandsontableOutput("summary_table")
+            rHandsontableOutput("summary_table"), br(),br()
         ),
-        #infoBoxOutput("significance",width=4)
         box(title="One-way ANOVA", width=6, status="primary",
             verbatimTextOutput("anovatable"))
       )
