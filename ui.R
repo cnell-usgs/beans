@@ -1,5 +1,6 @@
 
 library(shinydashboard)
+##need to figure out how to have conditional messages if there is not enough data yet to fill blank boxes
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
@@ -36,7 +37,9 @@ body <- dashboardBody(
         box(title="Data Summary", width = 6,status="primary",
             rHandsontableOutput("summary_table")
         ),
-        infoBoxOutput("significance",width=4)
+        #infoBoxOutput("significance",width=4)
+        box(title="One-way ANOVA", width=6, status="primary",
+            verbatimTextOutput("anovatable"))
       )
     ),
     tabItem(tabName="test",

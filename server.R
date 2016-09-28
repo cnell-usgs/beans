@@ -28,7 +28,7 @@ shinyServer(function(input,output){
   values$df_data = data.frame(variable1= as.numeric(rep(0,40)),
                                   variable2=as.numeric(rep(0,40)),
                                   Treatment = as.factor(rep("treat1",40)),
-                                  prop = as.numeric(rep(0,40)))
+                                  Proportion = as.numeric(rep(0,40)))
   values$summ_data = data.frame(Treatment = c("treat1","treat2"),
                                 mean_prop = c(0,0),
                                 n_df = c(0,0),
@@ -38,11 +38,11 @@ shinyServer(function(input,output){
   
   ##generate talbes
   output$table1 = renderRHandsontable({
-    pvar1<-paste0("Prop(",input$var1,")")
+    pvar1<-paste0("Proportion(",input$var1,")")
     rhandsontable(values$df_data1,colHeaders =c(input$var1,input$var2,pvar1))
   })
   output$table2 = renderRHandsontable({
-    pvar1<-paste0("Prop(",input$var1,")")
+    pvar1<-paste0("Proportion(",input$var1,")")
     rhandsontable(values$df_data2,colHeaders =c(input$var1,input$var2,pvar1))
   })
   
@@ -54,16 +54,16 @@ shinyServer(function(input,output){
     df_data2$Treatment<-rep(input$treat2,length(values$df_data2$variable1))
     
     df_data_all<-rbind(df_data1,df_data2)
-    df_data_all$prop<-df_data_all$variable1/(df_data_all$variable1+df_data_all$variable2)
+    df_data_all$Proportion<-df_data_all$variable1/(df_data_all$variable1+df_data_all$variable2)
     
     summdata<-df_data_all%>%#summarize data
       na.omit()%>%
       group_by(Treatment)%>%
-      summarize(mean_prop = mean(prop), 
-                n_df = length(prop), 
-                se_prop=se(prop), 
-                sd_prop = sd(prop), 
-                ci_prop = ci95(prop))
+      summarize(mean_prop = mean(Proportion), 
+                n_df = length(Proportion), 
+                se_prop=se(Proportion), 
+                sd_prop = sd(Proportion), 
+                ci_prop = ci95(Proportion))
     
     values$df_data<-df_data_all
     values$summ_data<-summdata
@@ -92,7 +92,7 @@ shinyServer(function(input,output){
   output$histo<- renderPlot({
     xvar.lab<-paste("Proportion",input$var1)
     
-    hist.plot<-ggplot(data=values$df_data,aes(x=prop,fill=Treatment,color=Treatment))+
+    hist.plot<-ggplot(data=values$df_data,aes(x=Proportion,fill=Treatment,color=Treatment))+
       geom_density(alpha=.35)+
       theme_mooney(legend.location="bottom")+
       labs(x=xvar.lab,y="Frequency")+
@@ -113,26 +113,35 @@ shinyServer(function(input,output){
     stat.df<-values$df_data%>%
       na.omit()%>%
       group_by(Treatment)%>%
-      summarize(N = length(prop),
-                SE = se(prop),
-                S = sd(prop),
-                mean = mean(prop),
-                t = ttable[ttable$n == length(prop),2],
-                CI = ci95(prop),
-                CIlow = mean(prop)-ci95(prop),
-                CIhi = mean(prop)-ci95(prop))
+      summarize(N = length(Proportion),
+                SE = se(Proportion),
+                S = sd(Proportion),
+                mean = mean(Proportion),
+                t = ttable[ttable$n == length(Proportion),2],
+                CI = ci95(Proportion),
+                CIlow = mean(Proportion)-ci95(Proportion),
+                CIhi = mean(Proportion)-ci95(Proportion))
     rhandsontable(stat.df[,-1], rowHeaders=c(input$treat1,input$treat2),
                   colHeaders=c("N","SE","S","Mean","T","95% CI","Low CI","High CI"),readOnly=TRUE,
                   rowHeaderWidth=130)%>%
       hot_cols(colWidths = 60)
   })
   
-  output$significance <- renderInfoBox({
-    infoBox(
-      "Test:",br(),"P = ",icon = icon("thumbs-up",lib="glyphicon"),
-      color="blue", fill=TRUE
-    )
+  output$aovtable<-renderRHandsontable({
+    aov2<-aov(Proportion~Treatment,data=values$df_data)
+   
+    
+    rhandsontable(aovdata)
   })
+  
+  output$anovatable<-renderPrint({
+    aov.model<-aov(Proportion~Treatment,data=values$df_data)
+    print(aov.model)
+    br()
+    br()
+    print(summary(aov.model))
+  })
+  
 
   ##download csv of data
   output$downloadData <-downloadHandler(
