@@ -21,14 +21,14 @@ shinyServer(function(input,output){
   
   ##make blank dfs
   
-  values <- reactiveValues(df_data1 = data.frame(variable1 = as.numeric(rep(NA,20)),
-                                                variable2 = as.numeric(rep(NA,20))),
-                           df_data2 =data.frame(variable1 = as.numeric(rep(NA,20)),
-                                                variable2 = as.numeric(rep(NA,20))))
-  values$df_data = data.frame(variable1= as.numeric(rep(0,40)),
-                                  variable2=as.numeric(rep(0,40)),
-                                  Treatment = as.factor(rep("treat1",40)),
-                                  Proportion = as.numeric(rep(0,40)))
+  values <- reactiveValues(df_data1 = data.frame(variable1 = as.numeric(rep(NA,50)),
+                                                variable2 = as.numeric(rep(NA,50))),
+                           df_data2 =data.frame(variable1 = as.numeric(rep(NA,50)),
+                                                variable2 = as.numeric(rep(NA,50))))
+  values$df_data = data.frame(variable1= as.numeric(rep(0,100)),
+                                  variable2=as.numeric(rep(0,100)),
+                                  Treatment = as.factor(rep("treat1",100)),
+                                  Proportion = as.numeric(rep(0,100)))
   values$summ_data = data.frame(Treatment = c("treat1","treat2"),
                                 mean_prop = c(0,0),
                                 n_df = c(0,0),
@@ -39,11 +39,11 @@ shinyServer(function(input,output){
   ##generate talbes
   output$table1 = renderRHandsontable({
     pvar1<-paste0("Proportion(",input$var1,")")
-    rhandsontable(values$df_data1,colHeaders =c(input$var1,input$var2,pvar1))
+    rhandsontable(values$df_data1,width=300,height=475,colHeaders =c(input$var1,input$var2,pvar1))
   })
   output$table2 = renderRHandsontable({
     pvar1<-paste0("Proportion(",input$var1,")")
-    rhandsontable(values$df_data2,colHeaders =c(input$var1,input$var2,pvar1))
+    rhandsontable(values$df_data2,width=300,height=475,colHeaders =c(input$var1,input$var2,pvar1))
   })
   
   observeEvent(input$getdata, { #an error occurs if there are empty cells ' must be vector type was null'
@@ -110,6 +110,9 @@ shinyServer(function(input,output){
   
   
   output$summary_table<- renderRHandsontable({
+    validate(
+      need(input$getdata, "Enter values and press 'Run Data' for summary statistics")
+    )
     stat.df<-values$df_data%>%
       na.omit()%>%
       group_by(Treatment)%>%
@@ -126,15 +129,12 @@ shinyServer(function(input,output){
                   rowHeaderWidth=130)%>%
       hot_cols(colWidths = 60)
   })
-  
-  output$aovtable<-renderRHandsontable({
-    aov2<-aov(Proportion~Treatment,data=values$df_data)
-   
-    
-    rhandsontable(aovdata)
-  })
+
   
   output$anovatable<-renderPrint({
+    validate(
+      need(input$getdata, "Enter values and press 'Run Data' for ANOVA test results")
+    )
     aov.model<-aov(Proportion~Treatment,data=values$df_data)
     print(aov.model)
     br()
