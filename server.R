@@ -4,9 +4,16 @@ library(rhandsontable)
 library(dplyr)
 library(devtools)
 library(readr)
+library(RCurl)
+
+##proportion column
+##3replicates
 
 ttable<-read.csv("https://raw.githubusercontent.com/collnell/beans/master/ttable.csv")#ttable
 source_url("https://raw.githubusercontent.com/collnell/R_vis/master/theme_mooney.R")#ggplot theme
+DIY_code<-source_url("https://raw.githubusercontent.com/collnell/beans/master/beans_DIY")##DIY code
+DIY_code2<-getURL("https://raw.githubusercontent.com/collnell/beans/master/beans_DIY", ssl.verifypeer = FALSE)
+eval(parse(text=DIY_code2))
 
 se <- function(x) sqrt(var(x)/length(x))
 ci95 <-function(x) se(x)*ttable[ttable$n == length(x),2]
@@ -65,7 +72,7 @@ shinyServer(function(input,output){
                 sd_prop = sd(Proportion), 
                 ci_prop = ci95(Proportion))
     
-    values$df_data<-df_data_all
+    values$df_data<-df_data_all%>%na.omit()
     values$summ_data<-summdata
   })
 
@@ -95,7 +102,7 @@ shinyServer(function(input,output){
     hist.plot<-ggplot(data=values$df_data,aes(x=Proportion,fill=Treatment,color=Treatment))+
       geom_density(alpha=.35)+
       theme_mooney(legend.location="bottom")+
-      labs(x=xvar.lab,y="Frequency")+
+      labs(x=xvar.lab,y="Density")+
       scale_fill_manual(values=c("#006666","#FF9900"))+
       scale_color_manual(values=c("#006666","#FF9900"))
     
@@ -146,18 +153,10 @@ shinyServer(function(input,output){
   ##download csv of data
   output$downloadData <-downloadHandler(
     filename = function() {
-      paste("data-",Sys.Date(),".csv", sep="")
+      paste("beans_data.csv", sep="")
     },
     content = function(file){
-      write.csv(testdf1,file)
-    }
-  )
-  output$downloadplotr <-downloadHandler(##this should be redone
-    filename=function(){
-      paste("ggplot_bar.r")
-    },
-    content =function(file){
-      write_rds(bar.plot,file,compress="none")
+      write.csv(values$df_data,file)
     }
   )
 
