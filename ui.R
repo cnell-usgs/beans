@@ -1,6 +1,11 @@
 
 
 library(shinydashboard)
+<<<<<<< Updated upstream
+=======
+library(rhandsontable)
+##need to figure out how to have conditional messages if there is not enough data yet to fill blank boxes
+>>>>>>> Stashed changes
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
@@ -18,6 +23,7 @@ body <- dashboardBody(
   tabItems(
     tabItem(tabName="example",
       fluidRow(
+<<<<<<< Updated upstream
         box(title="Using this app",width=3,status="primary",
             p("This app demonstrates the comparison of 2 treatment groups, for which the proportion of 'Variable A' between the treatments is the measure of interest."),
             p("For the 2 treatments and variables, use the left-hand side to rename what you are measuring then enter your data in the tables provided."),br(),
@@ -27,6 +33,19 @@ body <- dashboardBody(
             p("To replicate these analyses in R, download the data and code to produce the same outputs"),br(),
             downloadButton("downloadData","Download Data"),
             actionButton("opencode","See R code",icon=icon("calculator",lib="font-awesome"),onclick="window.open('https://raw.githubusercontent.com/collnell/beans/master/beans_DIY','_blank')")),
+=======
+        box(title = "Comparing and plotting means",width=3,solidHeader=TRUE,status="primary",collapsible = TRUE,
+            p("Use the text boxes on the left to name the treatments and variables. Enter data in the respective tables."),br(),
+            p("Pressing 'Run Data' initiates a one-way ANOVA test on the data entered in the tables. 
+              This test evaluates whether the variable of interest differs between the two treatment groups"),br(),
+            p("Summary statistics will also be calculated and plotted. Use the controls to select which variables are plotted."),br(),
+            p("Note: data must be entered for both treatments in order for the outputs to work."),br(),
+            actionButton("getdata","Run Data"),br(),br(),
+            p("To replicate these analyses in R, use download the data and code that produces these outputs."),
+            downloadButton("downloadData","Download Data"),
+            downloadButton("downloadplotr","Get code")
+        ),
+>>>>>>> Stashed changes
         box(title = "Data Entry", width=5,solidHeader = TRUE,status="primary",
             column(width=5,textOutput("tr1"), rHandsontableOutput("table1")),
             column(width=5,textOutput("tr2"),rHandsontableOutput("table2"))
@@ -34,13 +53,24 @@ body <- dashboardBody(
         tabBox(id = "plots",width = 4,
             tabPanel("Plotting means",plotOutput("plot1"),
               radioButtons("errortype", "Error bars:", 
+<<<<<<< Updated upstream
                            choices=c("95% Confidence interval"="ci","Standard error (SE)"="se","Standard deviation (S)"="sd"))),
+=======
+                           choices=c("95% Confidence interval"="ci","Standard error (SE)"="se","Standard deviation (S)"="sd")),
+              htmlOutput("selectUI")
+              ),
+>>>>>>> Stashed changes
             tabPanel("Histogram",plotOutput("histo"),
-              checkboxInput("showmean","Show means", value=FALSE))
+              checkboxInput("showmean","Show means", value=FALSE),
+              htmlOutput("selectUI"))
         )
       ),
       fluidRow(
         box(title="Data Summary", width = 6,status="primary",
+<<<<<<< Updated upstream
+=======
+            textOutput("vartext"),
+>>>>>>> Stashed changes
             rHandsontableOutput("summary_table"), br(),br()
         ),
         box(title="One-way ANOVA", width=6, status="primary",
